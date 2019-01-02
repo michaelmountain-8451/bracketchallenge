@@ -14,3 +14,6 @@ Vagrantfile
 .vagrant/*
 
 *.ini
+venv
+MySQL_python-1.2.5-cp27-none-win32.whl
+MySQL_python-1.2.5-cp27-none-win_amd64.whl
