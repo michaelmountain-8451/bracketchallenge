@@ -33,12 +33,3 @@ SQLALCHEMY_POOL_RECYCLE = 499
 SQLALCHEMY_POOL_TIMEOUT = 20
 
 LOGFILE = 'logfile.txt'
-
-# email server
-MAIL_SERVER = 'smtp.gmail.com'
-MAIL_PORT = 465
-MAIL_USE_TLS = False
-MAIL_USE_SSL = True
-MAIL_USERNAME = 'gmail-username'
-MAIL_PASSWORD = 'gmail-password'
-MAIL_FROM = 'from.address@example.com'
