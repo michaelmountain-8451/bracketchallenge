@@ -16,9 +16,13 @@ APPLICATIONS_OPEN = True
 
 
 BOT_REDDIT_CLIENT_ID = "From Reddit"
+REDDIT_CLIENT_ID = "From Reddit"
 BOT_REDDIT_CLIENT_SECRET = "Also from Reddit... DO NOT SHARE"
+REDDIT_CLIENT_SECRET = "Also from Reddit... DO NOT SHARE"
 BOT_REDDIT_REDIRECT_URI = "http://localhost:5000/authorize_callback"
+REDDIT_REDIRECT_URI = "http://localhost:5000/authorize_callback"
 BOT_REDDIT_USER_AGENT = '/r/CollegeBasketball User Poll'
+REDDIT_USER_AGENT = '/r/CollegeBasketball User Poll'
 BOT_REDDIT_USERNAME = 'Your reddit username'
 BOT_REDDIT_PASSWORD = 'Your reddit password'
 
