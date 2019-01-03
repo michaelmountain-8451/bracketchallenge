@@ -353,3 +353,10 @@ class ConsumptionTag(db.Model):
 
     def __str__(self):
         return self.text
+
+
+class Conferences(db.Model):
+    __tablename__  = 'conferences'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(160))
+    year = db.Column(db.Integer)
