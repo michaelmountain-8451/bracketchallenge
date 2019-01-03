@@ -355,8 +355,36 @@ class ConsumptionTag(db.Model):
         return self.text
 
 
-class Conferences(db.Model):
-    __tablename__  = 'conferences'
+class Conference(db.Model):
+    __tablename__  = 'conference'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(160))
     year = db.Column(db.Integer)
+
+
+class Game(db.Model):
+    __tablename__ = 'game'
+    id = db.Column(db.Integer, primary_key=True)
+    conference_id = db.Column(db.Integer, db.ForeignKey('conference.id'))
+    point_value = db.Column(db.Integer)
+    home_team_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=True)
+    away_team_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=True)
+    next_game = db.Column(db.Integer, db.ForeignKey('game.id'), nullable=True)
+    winner_is_home = db.Column(db.Boolean, nullable=True)
+    is_championship = db.Column(db.Boolean)
+
+
+class Result(db.Model):
+    __tablename = 'result'
+    id = db.Column(db.Integer, primary_key=True)
+    game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
+    winning_team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
+
+
+class Prediction(db.Model):
+    __tablename__ = 'prediction'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    winning_team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
+
+
