@@ -366,12 +366,15 @@ class Game(db.Model):
     __tablename__ = 'game'
     id = db.Column(db.Integer, primary_key=True)
     conference_id = db.Column(db.Integer, db.ForeignKey('conference.id'))
-    point_value = db.Column(db.Integer)
+    point_value = db.Column(db.Float)
     home_team_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=True)
     away_team_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=True)
-    next_game = db.Column(db.Integer, db.ForeignKey('game.id'), nullable=True)
+    next_game_id = db.Column(db.Integer, db.ForeignKey('game.id'), nullable=True)
     winner_is_home = db.Column(db.Boolean, nullable=True)
     is_championship = db.Column(db.Boolean)
+    __table_args__ = (
+        UniqueConstraint('next_game_id', 'winner_is_home', name='one_winner'),
+        {})
 
 
 class Result(db.Model):
@@ -384,6 +387,7 @@ class Result(db.Model):
 class Prediction(db.Model):
     __tablename__ = 'prediction'
     id = db.Column(db.Integer, primary_key=True)
+    game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     winning_team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
 
