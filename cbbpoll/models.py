@@ -360,6 +360,7 @@ class Conference(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(160))
     year = db.Column(db.Integer)
+    games = db.Relationship('Game', backref='conference')
 
 
 
@@ -376,10 +377,8 @@ class Game(db.Model):
     __table_args__ = (
         UniqueConstraint('next_game_id', 'winner_is_home', name='one_winner'),
         {})
-    result = db.Relationship('Result', uselist=False, back_populates='result')
+    result = db.Relationship('Result', uselist=False, back_populates='game')
     team = db.Relationship('Team', backref='games')
-    conferences = db.Relationship('Conference', backref='game')
-    prediction = db.Relationship('Prediction', backref='games')
 
 
 class Result(db.Model):
@@ -387,7 +386,7 @@ class Result(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
     winning_team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
-    game = db.Relationship('Game', back_populates='game')
+    game = db.Relationship('Game', back_populates='result')
 
 
 class Prediction(db.Model):
@@ -396,5 +395,6 @@ class Prediction(db.Model):
     game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     winning_team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
+    game = db.Relationship('Game', backref='predictions')
 
 
