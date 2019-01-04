@@ -353,3 +353,48 @@ class ConsumptionTag(db.Model):
 
     def __str__(self):
         return self.text
+
+
+class Conference(db.Model):
+    __tablename__  = 'conference'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(160))
+    year = db.Column(db.Integer)
+    games = db.relationship('Game', backref='conference')
+
+
+class Game(db.Model):
+    __tablename__ = 'game'
+    id = db.Column(db.Integer, primary_key=True)
+    conference_id = db.Column(db.Integer, db.ForeignKey('conference.id'))
+    point_value = db.Column(db.Float)
+    home_team_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=True)
+    away_team_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=True)
+    next_game_id = db.Column(db.Integer, db.ForeignKey('game.id'), nullable=True)
+    winner_is_home = db.Column(db.Boolean, nullable=True)
+    is_championship = db.Column(db.Boolean)
+    __table_args__ = (
+        UniqueConstraint('next_game_id', 'winner_is_home', name='one_winner'),
+        {})
+    result = db.relationship('Result', uselist=False, back_populates='game')
+    home_team = db.relationship('Team', foreign_keys=[home_team_id])
+    away_team = db.relationship('Team', foreign_keys=[away_team_id])
+
+
+class Result(db.Model):
+    __tablename = 'result'
+    id = db.Column(db.Integer, primary_key=True)
+    game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
+    winning_team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
+    game = db.relationship('Game', back_populates='result')
+
+
+class Prediction(db.Model):
+    __tablename__ = 'prediction'
+    id = db.Column(db.Integer, primary_key=True)
+    game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    winning_team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
+    game = db.relationship('Game', backref='predictions')
+
+
