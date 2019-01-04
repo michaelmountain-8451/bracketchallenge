@@ -379,6 +379,8 @@ class Game(db.Model):
         {})
     result = db.Relationship('Result', uselist=False, back_populates='game')
     team = db.Relationship('Team', backref='games')
+    home_team = db.Relationship('Team', foreign_keys=[home_team_id])
+    away_team = db.Relationship('Team', foreign_keys=[away_team_id])
 
 
 class Result(db.Model):
