@@ -87,8 +87,8 @@ def upgrade():
 
     op.bulk_insert(user_table,
         [
-            { 'id' : 1, 'nickname' : 'Concision', 'role' : 'a' },
-            { 'id' : 2, 'nickname' : 'whatnamesarenttaken', 'role' : 'a' }
+            { 'id' : 1, 'nickname' : 'mountm', 'role' : 'a' },
+            { 'id' : 2, 'nickname' : 'isimon_catalyte', 'role' : 'a' }
         ])
 
     team_table = table('team',
