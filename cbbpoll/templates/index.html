@@ -4,7 +4,7 @@
 <div class="jumbotron">
     {% if not g.user.is_authenticated -%}
         <h1>Welcome All!</h1>
-    {% elif g.user.is_authenticated and not g.user.is_admin() %}
+    {% elif not g.user.is_admin() %}
         <h1>Howdy, partner!</h1>
     {% else%}
         <h1>"Awaiting instructions..."</h1>
