@@ -18,11 +18,27 @@
 <a href="{{url_for('apply')}}" class="btn btn-success btn-lg">Apply for Voter Status</a>
 {% endif %}
 </div>
-{% if poll %}
-<h2> Latest Poll Results </h2>
-<div class="row">
-<div class="h6 col-xs-8 col-md-5">Closed on {{timestamp(closed_eastern)}}</div><div class="h6 col-xs-4 col-md-3 text-right"><a href="{{url_for("polls", s=poll.season|int, w= poll.week|int)}}">Permalink to these Results</a></div>
+<div class="page-header">
+<h1>All {{teams.count()}} Division I Teams</h1>
 </div>
-{% include 'resulttable.html' %}
-{% endif %}
+<table class="table">
+	<tr>
+		<th>School Name</th>
+		<th>Logo</th>
+		<th>Nickname</th>
+		<th>Conference</th>
+		<th>Short Name</th>
+		<th>Flair Text</th>
+	</tr>
+{% for team in teams %}
+	<tr>
+		<td>{{team.full_name}}</td>
+		<td>{{team.logo_html(23)|safe}}</td>
+		<td>{{team.nickname}}</td>
+		<td>{{team.conference}}</td>
+		<td>{{team.short_name}}</td>
+		<td>{{team.flair}}</td>
+	</tr>
+{% endfor %}
+</table>
 {% endblock %}
