@@ -1,7 +1,7 @@
 from flask import render_template
 from flask_script import Manager
 from cbbpoll import app, bot, db
-from models import Poll, Team
+from models import Team
 from views import generate_results
 
 # The postcompleted command should not be timing-dependent

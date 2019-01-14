@@ -1,7 +1,6 @@
 from flask_script import Manager
 from cbbpoll import app, message
-from models import User, Poll
-
+from models import User
 # These are meant to be run hourly, more frequently than that will result in multiple reminders being sent
 
 ReminderCommand = Manager(usage='Send reminders for voters to submit ballots')

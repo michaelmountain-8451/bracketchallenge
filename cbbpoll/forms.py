@@ -3,7 +3,7 @@ from wtforms import StringField, SubmitField, FieldList, FormField, BooleanField
 from wtforms_alchemy.fields import QuerySelectField, QuerySelectMultipleField
 from wtforms.validators import Email, Optional, DataRequired, Length, ValidationError
 from cbbpoll import app
-from models import Team, ConsumptionTag
+from models import Team
 
 def all_teams():
     return Team.query

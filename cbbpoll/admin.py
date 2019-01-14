@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from botactions import update_flair
 
 from cbbpoll import app, db
-from models import User, Team, Ballot, Poll, Vote, VoterEvent, VoterApplication, ConsumptionTag
+from models import User, Team
 
 
 def teamChoices():
@@ -162,10 +162,3 @@ admin = Admin(name='User Poll Control Panel', index_view=MyAdminIndexView(endpoi
 admin.init_app(app)
 admin.add_view(UserAdmin(User, db.session))
 admin.add_view(TeamAdmin(Team, db.session))
-admin.add_view(PollAdmin(Poll, db.session))
-admin.add_view(BallotAdmin(Ballot, db.session))
-admin.add_view(VoteAdmin(Vote, db.session))
-admin.add_view(VoterEventAdmin(VoterEvent, db.session))
-admin.add_view(VoterApplicationAdmin(VoterApplication, db.session))
-admin.add_view(ConsumptionTagAdmin(ConsumptionTag, db.session))
-

@@ -2,8 +2,7 @@ from praw import Reddit
 from flask import render_template, flash, redirect, session, url_for, request, g, abort, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
 from cbbpoll import app, db, lm, admin, message
-from forms import EditProfileForm, PollBallotForm, VoterApplicationForm
-from models import User, Poll, Team, Ballot, Vote, VoterApplication
+from models import User, Team
 from datetime import datetime
 from pytz import utc, timezone
 from botactions import update_flair
@@ -27,47 +26,6 @@ def nl2br(eval_ctx, value):
 
 def user_by_nickname(name):
     return User.query.filter_by(nickname=name).first()
-
-
-def completed_polls():
-    return Poll.query.filter(Poll.has_completed == True).order_by(Poll.closeTime.desc())
-
-
-def open_polls():
-    return Poll.query.filter(Poll.is_open == True)
-
-
-def generate_results(poll, use_provisionals=False):
-    nonvoters = User.query.filter(User.was_voter_at(poll.closeTime)).all()
-    results_dict = {}
-    official_ballots = []
-    provisional_ballots = []
-    for ballot in poll.ballots:
-        if ballot.is_provisional:
-            provisional_ballots.append(ballot)
-        else:
-            official_ballots.append(ballot)
-            if ballot.voter in nonvoters:
-                nonvoters.remove(ballot.voter)
-    counted_ballots = list(official_ballots)
-    if use_provisionals:
-        counted_ballots.extend(provisional_ballots)
-    for ballot in counted_ballots:
-        for vote in ballot.votes:
-            if vote.team_id in results_dict:
-                results_dict[vote.team_id][0] += 26-vote.rank
-            else:
-                results_dict[vote.team_id] = [26-vote.rank, 0]
-            if vote.rank == 1:
-                results_dict[vote.team_id][1] += 1
-    results = sorted(results_dict.items(), key=lambda (k,v): (v[0],v[1]), reverse=True)
-
-    return (
-        results,
-        official_ballots,
-        provisional_ballots,
-        nonvoters)
-
 
 def timestamp(datetime):
     hour = datetime.hour % 12 or 12
@@ -103,29 +61,15 @@ def internal_error(error):
 @app.route('/')
 def index():
     user = g.user
-    poll = completed_polls().first()
-    open_poll = open_polls().first()
-    results = official_ballots = provisional_ballots = nonvoters = closed_eastern = closes_eastern = None
-
-    if poll:
-        closed_eastern = poll.closeTime.replace(tzinfo=utc).astimezone(eastern_tz)
-        (results, official_ballots, provisional_ballots, nonvoters) = generate_results(poll)
-
-    if open_poll:
-        closes_eastern = open_poll.closeTime.replace(tzinfo=utc).astimezone(eastern_tz)
 
     return render_template('index.html',
                            title='Home',
                            results=results,
                            user=user,
-                           poll=poll,
-                           official_ballots=official_ballots,
-                           provisional_ballots=provisional_ballots,
                            users=User.query,
                            teams=Team.query,
                            closed_eastern=closed_eastern,
                            nonvoters=nonvoters,
-                           open_poll=open_poll,
                            closes_eastern=closes_eastern)
 
 
