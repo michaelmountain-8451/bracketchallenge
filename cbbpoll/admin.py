@@ -54,6 +54,25 @@ class UserAdmin(AdminModelView):
         choices=[('u', 'user'), ('a', 'admin')]
         ))
 
+    @action('promote', 'Make Voter', 'Are you sure you want to grant voter status to the selected users?')
+    def action_promote(self, ids):
+        pass
+
+    @action('demote', 'Revoke Voter Status', 'Are you sure you want to revoke voter status from the selected users?')
+    def action_demote(self, ids):
+        pass
+
+    @action('update_flair', 'Update Flair', 'Update flair on the selected users? This may take some time and increase response time')
+    def action_update_flair(self, ids):
+        pass
+
+    @action('voter_flag','Flag for Voting', 'Flag selected users for voting?')
+    def action_voter_flag(self, ids):
+        pass
+
+    @action('voter_unflag','Unflag for Voting', 'Unflag selected users for voting?')
+    def action_voter_unflag(self, ids):
+        pass
 
 
 class TeamAdmin(AdminModelView):

@@ -33,6 +33,11 @@ class User(db.Model):
     emailReminders = db.Column(db.Boolean, default=False)
     pmReminders = db.Column(db.Boolean, default=False)
     applicationFlag = db.Column(db.Boolean, default=False)
+    ballots = []
+
+    voterEvents = []
+
+    voterApplication = {}
 
     @property
     def is_authenticated(self):
@@ -50,8 +55,6 @@ class User(db.Model):
 
     @property
     def team(self):
-        if self.flair_team:
-            return self.flair_team
         return None
 
     @property
@@ -87,6 +90,34 @@ class User(db.Model):
         db.session.add(self)
         db.session.commit()
         return True
+
+
+    @hybrid_property
+    def remind_viaRedditPM(self):
+        return False
+
+    @hybrid_property
+    def is_voter(self):
+        return False
+
+    @is_voter.expression
+    def is_voter(cls):
+        return False
+
+    @is_voter.setter
+    def is_voter(self, value):
+        pass
+
+    @hybrid_method
+    def was_voter_at(self, timestamp):
+        return False
+
+    @was_voter_at.expression
+    def was_voter_at(cls, timestamp):
+        return False
+
+    def name_with_flair(self, size=30):
+        return str(self.nickname)
 
     def __repr__(self):
         return '<User %r>' % self.nickname
