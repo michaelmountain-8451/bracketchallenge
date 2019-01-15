@@ -34,8 +34,6 @@ class User(db.Model):
     pmReminders = db.Column(db.Boolean, default=False)
     applicationFlag = db.Column(db.Boolean, default=False)
 
-    flair = db.Column(db.Integer, db.ForeignKey('team.id'))
-
     @property
     def is_authenticated(self):
         return True
@@ -90,12 +88,6 @@ class User(db.Model):
         db.session.commit()
         return True
 
-    def name_with_flair(self, size=30):
-        team = self.team
-        if not team:
-            return str(self.nickname)
-        return "%s%s" % (team.logo_html(size), self.nickname)
-
     def __repr__(self):
         return '<User %r>' % self.nickname
 
@@ -113,11 +105,9 @@ class Team(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(75))
     short_name = db.Column(db.String(50))
-    flair = db.Column(db.String(50))
     nickname = db.Column(db.String(50))
     png_name = db.Column(db.String(50))
     conference = db.Column(db.String(50))
-    fans = db.relationship('User', backref='flair_team')
 
     def png_url(self, size=30):
         return "http://cdn-png.si.com//sites/default/files/teams/basketball/cbk/logos/%s_%s.png" % (self.png_name, size)

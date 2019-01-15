@@ -33,7 +33,6 @@ bot = praw.Reddit(
     user_agent=app.config['BOT_REDDIT_USER_AGENT'],
     )
 
-from cbbpoll import views, models, admin
+from cbbpoll import views, models
 lm.anonymous_user = models.AnonymousUser
 app.jinja_env.globals['timestamp'] = views.timestamp
-

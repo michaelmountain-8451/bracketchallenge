@@ -2,6 +2,7 @@ from praw import Reddit
 from flask import render_template, flash, redirect, session, url_for, request, g, abort, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
 from cbbpoll import app, db, lm, admin, message
+from forms import EditProfileForm
 from models import User, Team
 from datetime import datetime
 from pytz import utc, timezone
@@ -67,10 +68,7 @@ def index():
                            results=results,
                            user=user,
                            users=User.query,
-                           teams=Team.query,
-                           closed_eastern=closed_eastern,
-                           nonvoters=nonvoters,
-                           closes_eastern=closes_eastern)
+                           teams=Team.query,)
 
 
 @app.route('/authorize_callback', methods=['GET', 'POST'])
@@ -148,18 +146,8 @@ def user(nickname, page=1):
     if user is None:
         flash('User ' + nickname + ' not found.', 'warning')
         return redirect(url_for('index'))
-    ballots = user.ballots.filter(Poll.has_completed == True)
-    application = VoterApplication.query.filter_by(user_id=user.id).filter_by(season=app.config['SEASON']).first()
-    if user == g.user or g.user.is_admin():
-        pending_ballot = user.ballots.filter(Poll.has_completed == False).first()
-        if pending_ballot:
-            ballots = user.ballots
-    ballots = ballots.join(Poll, Ballot.fullpoll).order_by(Poll.closeTime.desc())
-
     return render_template('user.html',
-                           ballots=ballots.paginate(page,10,False),
                            user=user,
-                           application=application,
                            title=nickname)
 
 
@@ -232,228 +220,9 @@ def teams():
                            teams=teams)
 
 
-@app.route('/submitballot', methods=['GET', 'POST'])
-@login_required
-def submitballot():
-    poll = open_polls().first()
-    if not poll:
-        flash('No open polls', 'info')
-        return redirect(url_for('index'))
-    ballot = Ballot.query.filter_by(poll_id=poll.id).filter_by(user_id=g.user.id).first()
-    teams = Team.query.all()
-    voter = current_user.is_voter
-    editing = bool(ballot)
-    closes_eastern = poll.closeTime.replace(tzinfo=utc).astimezone(eastern_tz)
-    if ballot:
-        vote_dicts = [{} for i in range(25)]
-        for vote in ballot.votes:
-            vote_index = vote.rank-1
-            vote_dicts[vote_index]['team'] = Team.query.get(vote.team_id)
-            vote_dicts[vote_index]['reason'] = vote.reason
-        data_in = {'votes': vote_dicts}
-        form = PollBallotForm(data=data_in)
-    elif app.config['DEBUG']:
-        vote_dicts = [{} for i in range(25)]
-        for i in range(25):
-            vote_dicts[i]['team'] = Team.query.get(i * 4 + 1)
-            vote_dicts[i]['reason'] = Team.query.get(i * 4 + 1).full_name
-        data_in = {'votes': vote_dicts}
-        form = PollBallotForm(data=data_in)
-    else:
-        form = PollBallotForm()
-
-    if form.validate_on_submit():
-        if ballot:
-            for vote in ballot.votes:
-                db.session.delete(vote)
-            ballot.updated = datetime.utcnow()
-        else:
-            ballot = Ballot(updated=datetime.utcnow(), poll_id=poll.id, user_id=g.user.id)
-        db.session.add(ballot)
-
-        # must commit here to get ballot id for the Vote objects.
-        #
-        # there is a race condition here with the check to see if a ballot exists earlier in this function.
-        # the database maintains the invariant of one ballot per (user, poll) pair, so this commit may fail.
-        # if it does, it's probably alright, as it means we came here with no ballot existing, but now one exists.
-        # so send them to their most recent ballot.
-
-        try:
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
-            ballot = Ballot.query.filter_by(poll_id=poll.id).filter_by(user_id=g.user.id).first()
-            if ballot:
-                return redirect(url_for('ballot', ballot_id=ballot.id))
-            else:
-                flash('Something went wrong... check your ballot.', 'warning')
-                return redirect(url_for('index'))
-
-        for voteRank, vote in enumerate(form.votes):
-            voteModel = Vote(ballot_id=ballot.id,
-                             team_id=vote.team.data.id,
-                             rank=(voteRank + 1),
-                             reason=vote.reason.data)
-            db.session.add(voteModel)
-        db.session.commit()
-        flash('Ballot submitted.', 'success')
-        return redirect(url_for('ballot', ballot_id=ballot.id))
-
-    return render_template('submitballot.html',
-                           teams=teams,
-                           form=form,
-                           poll=poll,
-                           title='Submit Ballot',
-                           is_provisional=not voter,
-                           editing=editing,
-                           closes_eastern=closes_eastern)
-
-
-@app.route('/poll/<int:s>/<int:w>', methods=['GET', 'POST'])
-def polls(s, w):
-    prov = request.args.get('prov', False)
-    detailed = request.args.get('detailed', False)
-    poll = Poll.query.filter_by(season=s).filter_by(week=w).first()
-    if not poll:
-        flash('No such poll', 'warning')
-        return redirect(url_for('index'))
-    closes_eastern = poll.closeTime.replace(tzinfo=utc).astimezone(eastern_tz)
-    if not poll.has_completed and not current_user.is_admin():
-        flash('Poll has not yet completed. Please wait until '+ timestamp(closes_eastern), 'warning')
-        return redirect(url_for('index'))
-    (results, official_ballots, provisional_ballots, nonvoters) = generate_results(poll, prov)
-
-    return render_template('polldetail.html',
-                           season=s,
-                           week=w,
-                           poll=poll,
-                           results=results,
-                           official_ballots=official_ballots,
-                           provisional_ballots=provisional_ballots,
-                           users=User.query,
-                           teams=Team.query,
-                           closes_eastern=closes_eastern,
-                           prov=prov,
-                           detailed=detailed,
-                           nonvoters=nonvoters)
-
-
-@app.route('/results')
-@app.route('/results/')
-@app.route('/results/<int:page>/')
-@app.route('/results/<int:page>')
-def results(page=1):
-    prov = request.args.get('prov', False)
-    polls = completed_polls().paginate(page, 1, False)
-    poll = None
-
-    if polls.items:
-        poll = polls.items[0]
-
-    if not poll:
-        if page == 1:
-            flash('No polls have been completed yet.  Check back soon!', 'info')
-        else:
-            flash('No such poll', 'warning')
-        return redirect(url_for('index'))
-
-    closes_eastern = poll.closeTime.replace(tzinfo=utc).astimezone(eastern_tz)
-
-    if not poll.has_completed and not current_user.is_admin():
-        flash('Poll has not yet completed. Please wait until '+ timestamp(closes_eastern), 'warning')
-        return redirect(url_for('index'))
-
-    (results, official_ballots, provisional_ballots, nonvoters) = generate_results(poll, prov)
-
-    return render_template('results.html',
-                           title='Results',
-                           season=poll.season,
-                           week=poll.week,
-                           polls=polls,
-                           poll=poll,
-                           official_ballots=official_ballots,
-                           provisional_ballots=provisional_ballots,
-                           page=page,
-                           results=results,
-                           users=User.query,
-                           teams=Team.query,
-                           closes_eastern=closes_eastern,
-                           prov=prov,
-                           nonvoters=nonvoters)
-
-
-@app.route('/overview', methods=['GET'])
-@app.route('/overview/', methods=['GET'])
-@app.route('/overview/<int:s>', methods=['GET'])
-@app.route('/overview/<int:s>/', methods=['GET'])
-def results_overview(s=0):
-    # If season isn't provided, try to grab the first completed poll.
-    if not s:
-        first_poll = completed_polls().first()
-        if not first_poll:
-            flash('No polls have been completed yet.', 'info')
-            return redirect(url_for('index'))
-        s = first_poll.season
-
-    polls_results = []
-    # Grab all polls for the given season, in order
-    polls = Poll.query.filter(Poll.season == s, Poll.has_completed == True).order_by(Poll.week.asc())
-    for poll in polls:
-        polls_results.append((
-            poll,
-            generate_results(poll)))
-
-    return render_template('overview.html',
-                           season=s,
-                           polls_results=polls_results,
-                           teams=Team.query)
-
-
-@app.route('/ballot', methods=['GET'])
-@app.route('/ballot/<int:ballot_id>/', methods=['GET'])
-@app.route('/ballot/<int:ballot_id>', methods=['GET'])
-def ballot(ballot_id=0):
-    # If no ballot is provided, try to grab the user's most recent ballot.
-    if not ballot_id and g.user.ballots is not None:
-        ballot = g.user.ballots.order_by(Ballot.id.desc()).first()
-        return redirect(url_for('ballot', ballot_id=ballot.id))
-    else:
-        ballot = Ballot.query.get(ballot_id)
-    if not ballot:
-        flash('No such ballot', 'warning')
-        return redirect(url_for('index'))
-    poll = Poll.query.get(ballot.poll_id)
-    closes_eastern = poll.closeTime.replace(tzinfo=utc).astimezone(eastern_tz)
-    updated_eastern = ballot.updated.replace(tzinfo=utc).astimezone(eastern_tz)
-    if not poll.has_completed and not current_user.is_admin() and current_user != ballot.voter:
-        flash('Poll has not yet completed. Please wait until ' + timestamp(closes_eastern), 'warning')
-        return redirect(url_for('index'))
-    votes = []
-    for vote in ballot.votes:
-        votes.append({'rank': vote.rank, 'team': vote.team_id, 'reason': vote.reason})
-    votes.sort(key=lambda vote: vote['rank'])
-
-    return render_template('ballot.html',
-                           ballot=ballot,
-                           votes=votes,
-                           teams=Team.query,
-                           updated_eastern=updated_eastern)
-
-
 @app.route('/about')
 def about():
     return render_template('about.html', title='About')
-
-
-@app.route('/voters')
-def voters():
-    users = User.query
-    voters = users.filter(User.is_voter == True)
-
-    return render_template('voters.html',
-                           title='Voters',
-                           users=users,
-                           voters=voters)
 
 
 @app.route('/apply', methods=['GET', 'POST'])
@@ -486,30 +255,6 @@ def apply():
     return render_template('apply.html',
                            title='Submit Application',
                            form=form)
-
-
-@app.route('/applications/all')
-def all_applications():
-    if not current_user.is_admin():
-        abort(403)
-    applications = VoterApplication.query.all()
-
-    return render_template('applications.html',
-                           title='Applications',
-                           applications=applications)
-
-
-@app.route('/applications')
-@app.route('/applications/<int:season>')
-def applications(season=0):
-    if not current_user.is_admin():
-        abort(403)
-    if not season:
-        season = app.config['SEASON']
-    applications = VoterApplication.query.filter(VoterApplication.season == season)
-    return render_template('applications.html',
-                           title='Applications',
-                           applications=applications)
 
 
 @app.route('/users')
