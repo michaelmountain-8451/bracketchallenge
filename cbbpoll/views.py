@@ -65,7 +65,6 @@ def index():
 
     return render_template('index.html',
                            title='Home',
-                           results=results,
                            user=user,
                            users=User.query,
                            teams=Team.query,)

@@ -42,12 +42,12 @@ class MyAdminIndexView(AdminIndexView):
 
 class UserAdmin(AdminModelView):
     column_display_pk = True
-    form_columns = ['nickname', 'email', 'emailConfirmed', 'role', 'emailReminders', 'pmReminders']
-    column_list = ['id', 'nickname', 'email', 'emailConfirmed', 'role', 'is_voter', 'applicationFlag' ]
-    column_sortable_list = ('id', 'nickname', 'email', 'emailConfirmed', 'role', 'applicationFlag')
+    form_columns = ['nickname', 'email', 'emailConfirmed', 'role', 'flair_team', 'flair', 'emailReminders', 'pmReminders']
+    column_list = ['id', 'nickname', 'email', 'emailConfirmed', 'role', 'is_voter', 'applicationFlag', 'flair_team.full_name' ]
+    column_sortable_list = ('id', 'nickname', 'email', 'emailConfirmed', 'role', 'applicationFlag', 'flair_team.full_name')
     column_searchable_list = ('nickname', 'email')
-    column_filters = ( 'applicationFlag')
     form_overrides = dict(role=Select2Field)
+    column_filters = ('flair_team.full_name', 'flair_team.conference')
     form_args = dict(
     # Pass the choices to the `SelectField`
         role=dict(
@@ -78,8 +78,8 @@ class UserAdmin(AdminModelView):
 class TeamAdmin(AdminModelView):
     column_display_pk = True
     page_size = 100
-    form_columns = ['full_name', 'short_name', 'nickname', 'conference', 'png_name']
-    column_list = ['id', 'full_name', 'short_name', 'nickname', 'conference', 'png_name']
+    form_columns = ['full_name', 'short_name', 'nickname', 'conference', 'flair', 'png_name']
+    column_list = ['id', 'full_name', 'short_name', 'nickname', 'conference', 'flair', 'png_name']
     column_searchable_list = ('full_name', 'short_name', 'nickname', 'conference')
 
 
@@ -87,5 +87,5 @@ class TeamAdmin(AdminModelView):
 # Create admin
 admin = Admin(name='User Poll Control Panel', index_view=MyAdminIndexView(endpoint="admin"))
 admin.init_app(app)
-admin.add_view(UserAdmin(User, db.session))
 admin.add_view(TeamAdmin(Team, db.session))
+admin.add_view(UserAdmin(User, db.session))
