@@ -21,6 +21,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=160), nullable=True),
     sa.Column('year', sa.Integer(), nullable=True),
+    sa.Column('status', sa.String(length=30), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('team',
@@ -467,6 +468,21 @@ def upgrade():
             { 'id' : 351, 'full_name' : 'Youngstown State University', 'short_name': 'Youngstown State', 'flair': 'YoungstownSt', 'nickname': 'Penguins', 'conference': 'Horizon League'}
         ]
     )
+    
+    conference_table = table('conference',
+                    sa.Column('id', sa.Integer(), nullable=False),
+                    sa.Column('name', sa.String(length=160), nullable=True),
+                    sa.Column('year', sa.Integer(), nullable=True),
+                    sa.Column('status', sa.String(length=30), nullable=True))
+
+
+    op.bulk_insert(conference_table,
+        [
+            { 'id' : 1, 'name' : 'Big Ten', 'year': 2018, 'status': 'Pending' },
+            { 'id' : 2, 'name' : 'ACC', 'year': 2018, 'status': 'Open' },
+            { 'id' : 3, 'name' : 'SEC', 'year': 2018, 'status': 'In Progress' },
+            { 'id' : 4, 'name' : 'Pac-12', 'year': 2018, 'status': 'Completed' }
+        ])
 
 
 def downgrade():
