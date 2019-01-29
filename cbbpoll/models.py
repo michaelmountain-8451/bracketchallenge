@@ -179,6 +179,7 @@ class Conference(db.Model):
     name = db.Column(db.String(160))
     year = db.Column(db.Integer)
     games = db.relationship('Game', backref='conference')
+    status = db.Column(db.String(30))
 
 
 class Game(db.Model):
