@@ -3,7 +3,7 @@ from flask import render_template, flash, redirect, session, url_for, request, g
 from flask_login import login_user, logout_user, current_user, login_required
 from cbbpoll import app, db, lm, admin, message
 from forms import EditProfileForm
-from models import User, Team
+from models import User, Team, Conference
 from datetime import datetime
 from pytz import utc, timezone
 from botactions import update_flair
@@ -67,7 +67,8 @@ def index():
                            title='Home',
                            user=user,
                            users=User.query,
-                           teams=Team.query,)
+                           teams=Team.query,
+                           conferences=Conference.query,)
 
 
 @app.route('/authorize_callback', methods=['GET', 'POST'])
