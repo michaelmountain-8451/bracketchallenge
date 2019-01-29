@@ -36,4 +36,3 @@ bot = praw.Reddit(
 from cbbpoll import views, models, admin
 lm.anonymous_user = models.AnonymousUser
 app.jinja_env.globals['timestamp'] = views.timestamp
-
