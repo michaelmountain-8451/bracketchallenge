@@ -3,71 +3,64 @@
 {% block content %}
 <div class="jumbotron">
     {% if not g.user.is_authenticated -%}
-    <h1>Welcome All!</h1>
+        <h1>Welcome All!</h1>
     {% elif not g.user.is_admin() %}
-    <h1>Howdy, partner!</h1>
+        <h1>Howdy, partner!</h1>
     {% else%}
-    <h1>"Awaiting instructions..."</h1>
+        <h1>"Awaiting instructions..."</h1>
     {%- endif %}
+        <p>Welcome to the Reddit College Basketball Tournament Challenge!</p>
     {% if not g.user.is_authenticated -%}
-    <p>Welcome to the Reddit College Basketball Tournament Challenge!</p>
-    <p><a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">Login Using Reddit</a></p>
-    <h2>Tournaments</h2>
-    <table class="table">
-        <tr>
-        <tr>
-            <th>Name</th>
-            <th>Year</th>
-            <th>Status</th>
-        </tr>
-        {% for conference in conferences %}
-        {% if conference.status == "In Progress" or conference.status == "Completed" %}
-        <tr>
-            <td>{{conference.name}} Conference Tournament</td>
-            <td>{{conference.year}}</td>
-            <td>{{conference.status}} Conference Tournament</td>
-        </tr>
-        {% endif %}
-        {% endfor %}
-    </table>
+        <p><a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">Login Using Reddit</a></p>
+        <h2>Tournaments</h2>
+        <table class="table">
+            <tr>
+                <th>Name</th>
+                <th>Year</th>
+                <th>Status</th>
+            </tr>
+            {% for conference in conferences if conference.status == "In Progress" or conference.status == "Completed"%}
+            <tr>
+                <td>{{conference.name}} Conference Tournament</td>
+                <td>{{conference.year}}</td>
+                <td>{{conference.status}} Conference Tournament</td>
+            </tr>
+            {% endfor %}
+        </table>
     {% elif not g.user.is_admin() -%}
-    <p>Welcome to the Reddit College Basketball Tournament Challenge!</p>
-    <p>Thank you for joining us {{user}}</p>
-    <h2>Tournaments</h2>
-    <table class="table">
-        <tr>
-            <th>Name</th>
-            <th>Year</th>
-            <th>Status</th>
-        </tr>
-        {% for conference in conferences %}
-        {% if conference.status != "Pending" %}
-        <tr>
-            <td>{{conference.name}} Conference Tournament</td>
-            <td>{{conference.year}}</td>
-            <td>{{conference.status}} Conference Tournament</td>
-        </tr>
-        {% endif %}
-        {% endfor %}
-    </table>
+        <p>Thank you for joining us {{user}}</p>
+        <h2>Tournaments</h2>
+        <table class="table">
+            <tr>
+                <th>Name</th>
+                <th>Year</th>
+                <th>Status</th>
+            </tr>
+            {% for conference in conferences if conference.status != "Pending"%}
+            <tr>
+                <td>{{conference.name}} Conference Tournament</td>
+                <td>{{conference.year}}</td>
+                <td>{{conference.status}} Conference Tournament</td>
+            </tr>
+            {% endfor %}
+        </table>
     {% else -%}
-    <p>Welcome to the Reddit College Basketball Tournament Challenge!</p>
-    <p>Thank you for administrating us {{user}}</p>
-    <h2>Tournaments</h2>
-    <table class="table">
-        <tr>
-            <th>Name</th>
-            <th>Year</th>
-            <th>Status</th>
-        </tr>
-        {% for conference in conferences %}
-        <tr>
-            <td>{{conference.name}} Conference Tournament</td>
-            <td>{{conference.year}}</td>
-            <td>{{conference.status}} Conference Tournament</td>
-        </tr>
-        {% endfor %}
-    </table>
+        <p>Thank you for administrating us {{user}}</p>
+        <h2>Tournaments</h2>
+        <table class="table">
+            <tr>
+                <th>Name</th>
+                <th>Year</th>
+                <th>Status</th>
+            </tr>
+            {% for conference in conferences %}
+            <tr>
+                <td>{{conference.name}} Conference Tournament</td>
+                <td>{{conference.year}}</td>
+                <td>{{conference.status}} Conference Tournament</td>
+            </tr>
+            {% endfor %}
+        </table>
     {% endif %}
 </div>
 {% endblock %}
