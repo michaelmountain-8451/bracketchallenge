@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from botactions import update_flair
 
 from cbbpoll import app, db
-from models import User, Team
+from models import User, Team, Game
 
 
 def teamChoices():
@@ -83,9 +83,20 @@ class TeamAdmin(AdminModelView):
     column_searchable_list = ('full_name', 'short_name', 'nickname', 'conference')
 
 
+class GameAdmin(AdminModelView):
+    column_display_pk = True
+    page_size = 100
+    form_columns = ['conference_id', 'point_value', 'home_team_id', 'away_team_id', 'next_game_id', 'winner_is_home',
+                    'is_championship']
+    column_list = ['id', 'conference_id', 'point_value', 'home_team_id', 'away_team_id', 'next_game_id',
+                   'winner_is_home', 'is_championship', 'result', 'home_team', 'away_team']
+    column_searchable_list = ('conference_id', 'point_value', 'home_team_id', 'away_team_id', 'next_game_id',
+                              'winner_is_home', 'is_championship')
+
 
 # Create admin
 admin = Admin(name='User Poll Control Panel', index_view=MyAdminIndexView(endpoint="admin"))
 admin.init_app(app)
 admin.add_view(TeamAdmin(Team, db.session))
 admin.add_view(UserAdmin(User, db.session))
+admin.add_view(GameAdmin(Game, db.session))
