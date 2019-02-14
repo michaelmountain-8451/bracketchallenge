@@ -3,6 +3,7 @@
 {% block content %}
 <body>
     <h1>Big 10 Conference Tournament</h1>
+    {{conferenceId}}
 <main id="tournament">
     <ul class="round round-1">
         {% for game in games if game.home_team_id %}
