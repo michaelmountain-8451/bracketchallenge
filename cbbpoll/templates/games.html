@@ -2,8 +2,19 @@
 {% set active_page = "games" %}
 {% block content %}
 <body>
-    <h1>Big 10 Conference Tournament</h1>
+
+ {% for game in games if game.conference_id == conferenceId %}
+    {% if loop.index == 1 %}
+        <h1>{{game.conference.name}} Conference Tournament</h1>
+    {%endif %}
+ {% endfor %}
+
+ {% for game in games if game.conference_id == conferenceId %}
+
     {{conferenceId}}
+        {{loop.length}}
+        <h1>True</h1>
+    {% endfor %}
 <main id="tournament">
     <ul class="round round-1">
         {% for game in games if game.home_team_id %}

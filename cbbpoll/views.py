@@ -226,7 +226,8 @@ def games(conferenceId):
     return render_template('games.html',
                            title='Games',
                            games=games,
-                           conferenceId=conferenceId)
+                           conferenceId=int(conferenceId),
+                           teams=teams)
 
 
 @app.route('/about')
