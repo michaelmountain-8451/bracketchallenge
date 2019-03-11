@@ -9,33 +9,33 @@
     {%endif %}
  {% endfor %}
 
- {% for game in games if game.conference_id == conferenceId %}
-
-    {{conferenceId}}
-        {{loop.length}}
-        <h1>True</h1>
-    {% endfor %}
 <main id="tournament">
+
     <ul class="round round-1">
-        {% for game in games if game.home_team_id %}
+            {% for game in games if game.conference_id == conferenceId %}
+        {% if games[loop.index-1].point_value == games[loop.index].point_value %}
+        {{games[loop.index].point_value}}
+                {{loop.index}}
             <li class="spacer">&nbsp;</li>
             <li class="game game-top">{{game.home_team}}</li>
             <li class="game game-spacer">&nbsp;</li>
             <li class="game game-bottom ">{{game.away_team}}</li>
-        {% endfor %}
+                {%endif %}
+            {% endfor %}
         <li class="spacer">&nbsp;</li>
     </ul>
+
     <ul class="round round-2">
+        {% for game in games if game.conference_id == conferenceId and game.point_value == 2 %}
+
         <li class="spacer">&nbsp;</li>
-        <li class="game game-top winner"></li>
+        <li class="game game-top winner">{{game.home_team}}</li>
         <li class="game game-spacer">&nbsp;</li>
-        <li class="game game-bottom "></li>
+        <li class="game game-bottom ">{{game.away_team}}</li>
+                {% endfor %}
+
         <li class="spacer">&nbsp;</li>
-    </ul>
-    <ul class="round round-3">
-        <li class="spacer">&nbsp;</li>
-        <li class="game game-top winner"></li>
-        <li class="spacer">&nbsp;</li>
+
     </ul>
 </main>
 </body>
