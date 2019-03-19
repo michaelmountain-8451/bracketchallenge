@@ -222,12 +222,11 @@ def teams():
 
 @app.route('/games/<conferenceId>')
 def games(conferenceId):
-    games = Game.query.all()
+    games = Game.query.filter_by(conference_id=conferenceId)
     return render_template('games.html',
                            title='Games',
                            games=games,
-                           conferenceId=int(conferenceId),
-                           teams=teams)
+                           conferenceId=int(conferenceId))
 
 
 @app.route('/about')

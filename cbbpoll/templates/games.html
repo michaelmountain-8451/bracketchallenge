@@ -12,15 +12,11 @@
 <main id="tournament">
 
     <ul class="round round-1">
-            {% for game in games if game.conference_id == conferenceId %}
-        {% if games[loop.index-1].point_value == games[loop.index].point_value %}
-        {{games[loop.index].point_value}}
-                {{loop.index}}
+            {% for game in games if game.conference_id == conferenceId and game.point_value == 1%}
             <li class="spacer">&nbsp;</li>
             <li class="game game-top">{{game.home_team}}</li>
             <li class="game game-spacer">&nbsp;</li>
             <li class="game game-bottom ">{{game.away_team}}</li>
-                {%endif %}
             {% endfor %}
         <li class="spacer">&nbsp;</li>
     </ul>
@@ -37,6 +33,7 @@
         <li class="spacer">&nbsp;</li>
 
     </ul>
+
 </main>
 </body>
 {% endblock %}
