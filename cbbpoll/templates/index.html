@@ -20,7 +20,7 @@
                 <th>Status</th>
             </tr>
             {% for conference in conferences if conference.status == "In Progress" or conference.status == "Completed"%}
-            <tr>
+            <tr onclick="document.location = 'games/{{conference.id}}';">
                 <td>{{conference.name}} Conference Tournament</td>
                 <td>{{conference.year}}</td>
                 <td>{{conference.status}} Conference Tournament</td>
@@ -37,7 +37,7 @@
                 <th>Status</th>
             </tr>
             {% for conference in conferences if conference.status != "Pending"%}
-            <tr>
+            <tr onclick="document.location = 'games/{{conference.id}}';">
                 <td>{{conference.name}} Conference Tournament</td>
                 <td>{{conference.year}}</td>
                 <td>{{conference.status}} Conference Tournament</td>
@@ -54,8 +54,8 @@
                 <th>Status</th>
             </tr>
             {% for conference in conferences %}
-            <tr>
-                <td>{{conference.name}} Conference Tournament</td>
+            <tr onclick="document.location = 'games/{{conference.id}}';">
+                <td >{{conference.name}} Conference Tournament</td>
                 <td>{{conference.year}}</td>
                 <td>{{conference.status}} Conference Tournament</td>
             </tr>

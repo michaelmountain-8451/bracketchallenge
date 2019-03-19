@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% set active_page = "games" %}
+{% block content %}
+<body>
+
+ {% for game in games if game.conference_id == conferenceId %}
+    {% if loop.index == 1 %}
+        <h1>{{game.conference.name}} Conference Tournament</h1>
+    {%endif %}
+ {% endfor %}
+
+<main id="tournament">
+    {% for group in games|groupby('point_value') %}
+    <ul class="round round-{{ loop.index }}"
+        {% for game in group.list %}
+            <li class="spacer">&nbsp;</li>
+            <li class="game game-top">{{game.home_team}}</li>
+            <li class="game game-spacer">&nbsp;</li>
+            <li class="game game-bottom ">{{game.away_team}}</li>
+        {% endfor %}
+    </ul>
+{% endfor %}
+
+</main>
+</body>
+{% endblock %}

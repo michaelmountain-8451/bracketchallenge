@@ -3,7 +3,7 @@ from flask import render_template, flash, redirect, session, url_for, request, g
 from flask_login import login_user, logout_user, current_user, login_required
 from cbbpoll import app, db, lm, admin, message
 from forms import EditProfileForm
-from models import User, Team, Conference
+from models import User, Team, Conference, Game
 from datetime import datetime
 from pytz import utc, timezone
 from botactions import update_flair
@@ -218,6 +218,15 @@ def teams():
     return render_template('teams.html',
                            title='Teams',
                            teams=teams)
+
+
+@app.route('/games/<conferenceId>')
+def games(conferenceId):
+    games = Game.query.filter_by(conference_id=conferenceId)
+    return render_template('games.html',
+                           title='Games',
+                           games=games,
+                           conferenceId=int(conferenceId))
 
 
 @app.route('/about')
